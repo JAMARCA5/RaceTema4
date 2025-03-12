@@ -307,6 +307,8 @@ cran %>%
 26. Añade una columna llamada `size_mb` que contenga el tamaño de cada descarga en megabytes.
 
 ```{r}
+cran %>%select(ip_id, country, package, size) %>%mutate(size_mb = size / 2^20) %>%  # Convertir bytes a megabytes
+  print()
 
 
 
@@ -314,13 +316,18 @@ cran %>%
 
 27. Selecciona aquellas descargas cuyo tamaño es menor o igual que 0.5 Mbytes
 ```{r}
-
+cran %>%select(ip_id, country, package, size) %>%mutate(size_mb = size / 2^20) %>%  # Convertir bytes a megabytes
+  filter(size_mb <= 0.5) %>%         # Filtrar descargas ≤ 0.5 MB
+  print()
 
 
 ```
 28. Repite el apartado anterior ordenando los resultados, en orden descendente según el tamaño en Megabytes y muéstralo por pantalla.
 ```{r}
-
+cran %>%select(ip_id, country, package, size) %>%mutate(size_mb = size / 2^20) %>%  # Convertir bytes a megabytes
+  filter(size_mb <= 0.5) %>%         # Filtrar descargas ≤ 0.5 MB
+  arrange(desc(size_mb)) %>%         # Ordenar en orden descendente
+  print()
 
 
 
@@ -373,13 +380,28 @@ Carga el fichero de datos `datostidyr.Rdata` que contiene varios conjuntos de da
 La columna `grade` es la calificación y las dos siguientes el número de estudiantes hombre y mujer que han recibido dicha calificación.
 ¿ Cuáles son las variables ?. Transfórmalo en un conjunto `tidy` con las variables, `grade, sex y count`
 ```{r}
+load("./data/datostidyr.Rdata")
 
+# Transformar el data frame a formato tidy
+students_tidy <- students %>%pivot_longer(cols = c(male, female),  # Convertir columnas "male" y "female" en filas
+               names_to = "sex",        # Nueva columna para el tipo de sexo
+               values_to = "count") %>% # Nueva columna para la cantidad
+  mutate(sex = recode(sex, male = "M", female = "F"))  # Opcional: Reemplazar nombres
+
+
+print(students_tidy)
 
 
 ```
 30. Considera el conjunto ´students2´, que es similar al primero pero que se han recogido datos correspondientes a dos grupos, (`male_1, female_1`, etc). Transfórmalo en un conjunto `tidy` añadiendo una columna adicional correspondiente al grupo (llama a la nueva variable `class`)
 ```{r}
-
+students2_tidy <- students2 %>%
+  pivot_longer(cols = starts_with("male") | starts_with("female"), # Unir columnas de género
+               names_to = "sex_class",    # Nueva columna con sexo y grupo
+               values_to = "count") %>%   # Nueva columna con los valores
+  separate(sex_class, into = c("sex", "class"), sep = "_") %>% # Separar en dos columnas
+  mutate(sex = recode(sex, male = "M", female = "F")) # Opcional: cambiar nombres
+print(students2_tidy)
 
 
 
