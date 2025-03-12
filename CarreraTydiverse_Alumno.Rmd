@@ -454,30 +454,23 @@ print(sat_tidy)
 
 36. Utiliza agrupamientos, según las variables `part, sex` y genera dos nuevas columnas que contengan el número total de estudiantes en dicho grupo, y la proporción dentro del grupo. Almacénalas en las variables `total y prop` respectivamente.
 ```{r}
-
-
-
-
-
-
-
-
-
+sat_grouped <- sat_tidy %>%
+  group_by(part, sex) %>%  # Agrupar por 'part' y 'sex'
+  mutate(total = sum(count),   # Total de estudiantes en cada grupo
+         prop = count / total) # Proporción dentro del grupo
+print(sat_grouped)
 ```
 37. Representa gráficamente el conjunto obtenido para mostrar las diferencias entre hombres y mujeres, en las diferentes pruebas para cada una de las franjas de calificación.
 ```{r}
-
-
-
-
-
-
-
-
-
-
-
-
+library(ggplot2)
+# Crear gráfico
+ggplot(sat_grouped, aes(x = score_range, y = prop, fill = sex)) +
+  geom_bar(stat = "identity", position = "dodge") + 
+  facet_wrap(~ part) +  # Facetas por tipo de prueba
+  labs(title = "Distribución de calificaciones en el SAT por sexo",
+       x = "Rango de puntuación",
+       y = "Proporción de estudiantes") +
+  theme_minimal()
 ```
 
 
@@ -485,28 +478,53 @@ print(sat_tidy)
 
 38. La función `today` devuelve la fecha actual. Almacéna la fecha actual en `this_day`, y muéstrala por pantalla. Usa las funciones `year, month y day` para extraer cada una de las partes. `wday` para obtener el día de la semana ()
 ```{r}
-
-
-
-
-
-
-
+# Obtener la fecha actual
+this_day <- today()
+# Mostrar la fecha actual
+print(this_day)
+# Extraer año, mes y día
+year_value <- year(this_day)
+month_value <- month(this_day)
+day_value <- day(this_day)
+# Obtener el día de la semana (como número y como nombre en inglés)
+weekday_number <- wday(this_day, week_start = 1)  # Lunes = 1, Domingo = 7
+weekday_name <- wday(this_day, label = TRUE, week_start = 1)  # Nombre en inglés
+# Mostrar los valores extraídos
+print(paste("Año:", year_value))
+print(paste("Mes:", month_value))
+print(paste("Día:", day_value))
+print(paste("Día de la semana (número):", weekday_number))
+print(paste("Día de la semana (nombre):", weekday_name))
 ```
 39. Guarda el instante actual en una variable llamada `this_moment` con la función `now`
 y muéstralo por pantalla. Usa las funciónes `hour, minute, second` para extraer la información de cada elemento.
 ```{r}
-
-
-
-
-
+# Obtener el instante actual
+this_moment <- now()
+# Mostrar el instante actual
+print(this_moment)
+# Extraer hora, minuto y segundo
+hour_value <- hour(this_moment)
+minute_value <- minute(this_moment)
+second_value <- second(this_moment)
+# Mostrar los valores extraídos
+print(paste("Hora:", hour_value))
+print(paste("Minuto:", minute_value))
+print(paste("Segundo:", second_value))
 ```
 40. La librería `lubridate` dispone de múltiples funciones para importar en formato fecha datos con un gran variedad de formatos de entrada `ymd(), dmy(), hms(), ymd_hms()` donde cada letra indica _years (y),months (m), days (d), hours (h), minutes (m), y seconds (s)_. Prueba my_date <- ymd("2019-02-14"), y determina de que clase es `my_date`. Las funciones son muy robustas y pueden intepretar correctamente diversos formato. Prueba `ymd()` para importar la fecha  __"1989 May 17"__. ¿Cómo importarías __"March 12, 1975"__?
 ```{r}
-
-
-
+library(lubridate)
+# Importar fechas con diferentes formatos
+my_date <- ymd("2019-02-14")
+print(my_date)
+print(class(my_date))  # Ver la clase del objeto
+# Importar "1989 May 17"
+date1 <- ymd("1989 May 17")
+print(date1)
+# Importar "March 12, 1975"
+date2 <- mdy("March 12, 1975")
+print(date2)
 ```
 41. Importa el valor numérico `25081985`, sabiendo que el formato es dia, mes, año, y posteriormente `192012` donde se ha almacenado año, mes y día. Modifica el campo fecha en el segundo caso añadiendo algún carácter separador para eliminar la ambigüedad.
 ```{r}
