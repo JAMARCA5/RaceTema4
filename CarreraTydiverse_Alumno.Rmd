@@ -309,9 +309,6 @@ cran %>%
 ```{r}
 cran %>%select(ip_id, country, package, size) %>%mutate(size_mb = size / 2^20) %>%  # Convertir bytes a megabytes
   print()
-
-
-
 ```
 
 27. Selecciona aquellas descargas cuyo tamaño es menor o igual que 0.5 Mbytes
@@ -319,8 +316,6 @@ cran %>%select(ip_id, country, package, size) %>%mutate(size_mb = size / 2^20) %
 cran %>%select(ip_id, country, package, size) %>%mutate(size_mb = size / 2^20) %>%  # Convertir bytes a megabytes
   filter(size_mb <= 0.5) %>%         # Filtrar descargas ≤ 0.5 MB
   print()
-
-
 ```
 28. Repite el apartado anterior ordenando los resultados, en orden descendente según el tamaño en Megabytes y muéstralo por pantalla.
 ```{r}
@@ -328,9 +323,6 @@ cran %>%select(ip_id, country, package, size) %>%mutate(size_mb = size / 2^20) %
   filter(size_mb <= 0.5) %>%         # Filtrar descargas ≤ 0.5 MB
   arrange(desc(size_mb)) %>%         # Ordenar en orden descendente
   print()
-
-
-
 ```
 **EXTRA**. Se desea mostar gráficamente aquellos países que suponen el mayor tráfico de información, ocasionado por el total de descargas acumuladas. Para facilitar la visualización céntrate en aquellos que están por encima del 90 % del top de descargas. El gráfico debe mostrar los valores de forma ordenada de mayor a menor. En el eje X debe aparecer el código de país y en el eje Y el tráfico generado. Intenta hacerlo usando una tubería sin emplear ninguna variable auxiliar.
 `cran%>%...+geom_point()`
@@ -381,17 +373,12 @@ La columna `grade` es la calificación y las dos siguientes el número de estudi
 ¿ Cuáles son las variables ?. Transfórmalo en un conjunto `tidy` con las variables, `grade, sex y count`
 ```{r}
 load("./data/datostidyr.Rdata")
-
 # Transformar el data frame a formato tidy
 students_tidy <- students %>%pivot_longer(cols = c(male, female),  # Convertir columnas "male" y "female" en filas
                names_to = "sex",        # Nueva columna para el tipo de sexo
                values_to = "count") %>% # Nueva columna para la cantidad
   mutate(sex = recode(sex, male = "M", female = "F"))  # Opcional: Reemplazar nombres
-
-
 print(students_tidy)
-
-
 ```
 30. Considera el conjunto ´students2´, que es similar al primero pero que se han recogido datos correspondientes a dos grupos, (`male_1, female_1`, etc). Transfórmalo en un conjunto `tidy` añadiendo una columna adicional correspondiente al grupo (llama a la nueva variable `class`)
 ```{r}
@@ -402,44 +389,51 @@ students2_tidy <- students2 %>%
   separate(sex_class, into = c("sex", "class"), sep = "_") %>% # Separar en dos columnas
   mutate(sex = recode(sex, male = "M", female = "F")) # Opcional: cambiar nombres
 print(students2_tidy)
-
-
-
 ```
 31. Considera el conjunto `students3` y observa por qué no es un `tidy data` . Las variables finales del conjunto deberían ser: `name, class, midterm, final`. Dado que un alumno solo puede estar en una de las clases aparecen muchos `NA`, al reorganizar, usa `na.rm=TRUE` en las opciones de `gather`
 ```{r}
-
-
-
-
+students3_tidy <- students3 %>%
+  pivot_longer(cols = starts_with("class"),  # Seleccionar columnas que comienzan con "class"
+               names_to = "class_exam",      
+               values_to = "score") %>%  
+  drop_na(score) %>%  # Eliminar valores NA
+  separate(class_exam, into = c("class", "exam"), sep = "_") %>% 
+  pivot_wider(names_from = exam, values_from = score)
+print(students3_tidy)
 ```
 32. Considera que la columna `class` queremos especificarla con valores, 1,2,3,4 y 5 en lugar de class1, ..., class5. En librería de importación de datos (`readr`) se proporcionan funciones que permite identificar y extraer diversos tipos de datos. Son las funciones `parse_XXXX`. Observa el efecto de aplicar `parse_number('class5')` y utiliza el resultado para realizar la tarea solicitada.
 
 ```{r}
+students3_tidy <- students3 %>%
+  pivot_longer(cols = starts_with("class"),  
+               names_to = "class_exam",      
+               values_to = "score") %>%  
+  drop_na(score) %>%  
+  separate(class_exam, into = c("class", "exam"), sep = "_") %>% 
+  mutate(class = parse_number(class)) %>%  # Convertimos "classX" en solo el número X
+  pivot_wider(names_from = exam, values_from = score)
 
-
-
-
-
-
+print(students3_tidy)
 ```
 33. Observa el conjunto `students4` donde se presenta el problema de tener varias observaciones en la misma tabla. Separa el conjunto en dos tablas, una que contenga información relativa a los estudiantes, que llamarás `student_info`, que no debe contener repeticiones, y otra con las calificaciones y la clave primaria que enlaza ambas tablas(`id`), que llamarás `gradebook`.
 ```{r}
-
-
-
-
-
-
-
-
-
+print(students4)
+# Separar en dos tablas
+student_info <- students4 %>%
+  select(id, name, sex,) %>%   # Seleccionar solo info del estudiante
+  distinct()  # Eliminar duplicados
+gradebook <- students4 %>%
+  select(id, class, midterm, final)  # Datos de calificaciones
+print(student_info)
+print(gradebook)
 ```
 34. Consideremos el caso de una observación almacenada en varias tablas. Observa los datos almacenados en `failed` y `passed` con la información de los alumnos que suspeden (calificaciones C,D,E,F) y los que aprueban (calificaciones A, B). Debes unir ambos conjuntos en uno que contenga una columna adicional llamada `status` que indicará `passed` o `failed` según la situación de cada alumno, puedes usar la función `bind_rows`.
 ```{r}
-
-
-
+students_status <- bind_rows(
+  failed %>% mutate(status = "failed"), 
+  passed %>% mutate(status = "passed")
+)
+print(students_status)
 ```
 # Pongamos todo en común.
 
@@ -447,12 +441,15 @@ print(students2_tidy)
 Considera los datos almacenado en `sat` y haz las transformaciones adecuadas para que las columnas del conjunto `tidy` sean `score_range, part, sex, count` en ese orden. Ten en cuenta que los datos totales no es necesario almacenarlos ya que se pueden generar a posteriori.
 
 ```{r}
-
-
-
-
-
-
+sat_tidy <- sat %>%
+  filter(score_range != "Total") %>%  # Eliminar la fila de totales
+  pivot_longer(
+    cols = -score_range,  # Mantener 'score_range' fija
+    names_to = c("part", "sex"),  # Separar nombres de columnas en 'part' y 'sex'
+    names_sep = "_" ,  # Separador que indica la división
+    values_to = "count"  # Nuevo nombre para los valores
+  )
+print(sat_tidy)
 ```
 
 36. Utiliza agrupamientos, según las variables `part, sex` y genera dos nuevas columnas que contengan el número total de estudiantes en dicho grupo, y la proporción dentro del grupo. Almacénalas en las variables `total y prop` respectivamente.
